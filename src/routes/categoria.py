@@ -1,7 +1,7 @@
-from flask import Blueprint, render_template, flash, redirect, url_for
+from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask_login import login_required
 
-from src.forms.categoria import NovoCategoriaForm
+from src.forms.categoria import NovoCategoriaForm, EditCategoriaForm
 from src.modules import db
 import sqlalchemy as sa
 from src.models.categoria import Categoria
@@ -31,6 +31,40 @@ def add():
         flash(f"Categoria'{form.nome.data}' adicionada")
         return redirect(url_for('categoria.lista'))
 
-    return render_template('categoria/add.jinja2',
+    return render_template('categoria/add_edit.jinja2',
                            title="Nova categoria",
                            form=form)
+@bp.route('/edit/<uuid:id_categoria>', methods=['GET', 'POST'])
+@login_required
+def edit(id_categoria):
+    categoria = Categoria.get_by_id(id_categoria)
+    if categoria is None:
+        flash("Categoria inexistente", category='warning')
+        return redirect(url_for('categoria.lista'))
+
+    form = EditCategoriaForm(request.values, obj=categoria)
+    if form.validate_on_submit():
+        old = categoria.nome
+        categoria.nome = form.nome.data
+        db.session.commit()
+        flash(f"Categoria {old} foi alterada para {categoria.nome} meu bom!", category='success')
+        return redirect(url_for('categoria.lista'))
+
+    return render_template('categoria/add_edit.jinja2',
+                           title="Alterar categoria",
+                           form=form)
+
+@bp.route('/dell/<uuid:id_categoria>', methods=['GET', 'POST'])
+@login_required
+def remove(id_categoria):
+    categoria = Categoria.get_by_id(id_categoria)
+    if categoria is None:
+        flash("Categoria inexistente", category='warning')
+        return redirect(url_for('categoria.lista'))
+
+    db.session.delete(categoria)
+    db.session.commit()
+    flash("Categoria removida meu bom!",category='success')
+    return redirect(url_for('categoria.lista'))
+
+
