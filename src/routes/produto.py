@@ -1,6 +1,6 @@
 from base64 import b64encode
 
-from flask import Blueprint, flash, redirect, url_for, render_template, request
+from flask import Blueprint, flash, redirect, url_for, render_template, request, abort, Response
 from flask_login import login_required
 
 from src.forms.produto import ProdutoForm
@@ -10,9 +10,9 @@ from src.modules import db
 
 bp = Blueprint('produto', __name__, url_prefix='/produto')
 
-@bp.route('/novo', methods=['GET', 'POST'])
+@bp.route('/add', methods=['GET', 'POST'])
 @login_required
-def novo():
+def add():
     if Categoria.is_empty():
         flash("Não há categorias cadastradas. Impossivel adicionar produto",
               category='warning')
@@ -31,7 +31,7 @@ def novo():
             produto.possui = True
             produto.foto_base64 = (b64encode(request.files[form.foto.name].read()).
                                    decode('ascii'))
-            produto.foto.mime = request.files[form.foto.name].mimetype
+            produto.foto_mime = request.files[form.foto.name].mimetype
         else:
             produto.possui_foto = False
             produto.foto_base64 = None
@@ -48,3 +48,20 @@ def novo():
 
     return render_template('produto/add_edit.jinja2', form=form,
                            title="Adicionar novo produto")
+
+@bp.route('/imagem/<uuid:id_produto>', methods=['GET'])
+def imagem(id_produto,):
+    produto = Produto.get_by_id(id_produto)
+    if produto is None:
+        return abort(404)
+    conteudo, tipo = produto.imagem
+    return Response(conteudo, mimetype=tipo)
+
+@bp.route('/thumbnail/<uuid:id_produto>', methods=['GET'])
+@bp.route('/thumbnail/<uuid:id_produto>', methods=['GET'])
+def thumbnail(id_produto, size=128):
+    produto = Produto.get_by_id(id_produto)
+    if produto is None:
+        return abort(404)
+    conteudo, tipo = produto.thumbnail(size)
+    return Response(conteudo, mimetype=tipo)
