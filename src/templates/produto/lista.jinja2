@@ -9,7 +9,7 @@
         <th scope="col" class="text-end">Preço</th>
         <th scope="col">Categoria</th>
         <th scope="col">Ativo</th>
-        <th scope="col">Estoque</th>
+        <th scope="col" class="text-end">Estoque</th>
         <th scope="col" class="text-center">Operações</th>
     </tr>
     </thead>
@@ -20,7 +20,10 @@
             <td>{{ produto.categoria.nome }}</td>
             <td>{% if produto.ativo %}{{ render_icon('check', color='success', size='1.5em')}}
             {% else %}{{ render_icon('x', color='danger', size='1.5em')}}{% endif %}</td>
-            <td>{{ produto.estoque }}</td>
+            <td class="text-end"> {{ produto.estoque }}</td>
+            <td class="text-center"> <a href="{{ url_for('produto.edit', produto_id = produto.id) }}">
+        {{ render_icon('pencil-square', color='primary', size='1.25em') }}</a>
+            </td>
     {% endfor %}
     </tbody>
     </table>
