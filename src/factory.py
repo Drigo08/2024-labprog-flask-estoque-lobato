@@ -8,7 +8,6 @@ from flask import Flask, render_template
 from flask_login import user_logged_in
 
 from src.models.categoria import Categoria
-from src.models.produto import Produto
 from src.models.usuario import User
 from src.modules import bootstrap, csrf, db, login, mail, minify
 from src.utils import as_localtime, existe_esquema, timestamp
@@ -83,11 +82,8 @@ def create_app(config_filename: str = 'config.dev.json') -> Flask:
             sys.exit(1)
 
         if Categoria.is_empty():
-            categorias = ["Bebidas",
-                          "Carnes",
-                          "Padaria",
-                          "Laticínios",
-                          "Hortifruti"]
+            categorias = ["Bebidas", "Carnes", "Padaria",
+                          "Laticínios", "Hortifruti"]
             for c in categorias:
                 categoria = Categoria()
                 categoria.nome = c

@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, request
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 
-from src.forms.categoria import NovoCategoriaForm, EditCategoriaForm
+from src.forms.categoria import EditCategoriaForm, NovoCategoriaForm
 from src.modules import db
-import sqlalchemy as sa
 from src.models.categoria import Categoria
+import sqlalchemy as sa
 
 bp = Blueprint('categoria', __name__, url_prefix='/categoria')
 
@@ -18,7 +18,6 @@ def lista():
                            rset=rset)
 
 
-
 @bp.route('/add', methods=['GET', 'POST'])
 @login_required
 def add():
@@ -28,12 +27,13 @@ def add():
         categoria.nome = form.nome.data
         db.session.add(categoria)
         db.session.commit()
-        flash(f"Categoria'{form.nome.data}' adicionada")
+        flash(f"Categoria '{form.nome.data}' adicionada")
         return redirect(url_for('categoria.lista'))
 
     return render_template('categoria/add_edit.jinja2',
                            title="Nova categoria",
                            form=form)
+
 @bp.route('/edit/<uuid:id_categoria>', methods=['GET', 'POST'])
 @login_required
 def edit(id_categoria):
@@ -44,17 +44,15 @@ def edit(id_categoria):
 
     form = EditCategoriaForm(request.values, obj=categoria)
     if form.validate_on_submit():
-        old = categoria.nome
         categoria.nome = form.nome.data
         db.session.commit()
-        flash(f"Categoria {old} foi alterada para {categoria.nome} meu bom!", category='success')
+        flash("Categoria alterada", category='success')
         return redirect(url_for('categoria.lista'))
 
     return render_template('categoria/add_edit.jinja2',
-                           title="Alterar categoria",
-                           form=form)
+                           title="Alterar categoria", form=form)
 
-@bp.route('/dell/<uuid:id_categoria>', methods=['GET', 'POST'])
+@bp.route('/del/<uuid:id_categoria>', methods=['GET', 'POST'])
 @login_required
 def remove(id_categoria):
     categoria = Categoria.get_by_id(id_categoria)
@@ -64,7 +62,5 @@ def remove(id_categoria):
 
     db.session.delete(categoria)
     db.session.commit()
-    flash("Categoria removida meu bom!",category='success')
+    flash("Categoria removida", category='success')
     return redirect(url_for('categoria.lista'))
-
-
